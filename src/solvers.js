@@ -57,12 +57,13 @@ window.countNRooksSolutions = function(n) {
   var solutionCount = 0; //fixme
   var board = new Board({n: n});
   
+  
   // available columns
   var openColumns = {};
   for (var i = 0; i < n; i++) {
     openColumns[i] = i;
   }
-    
+  
   // function to check rows below
   var checkRowBelow = function(row) {
     // for each column
@@ -77,7 +78,8 @@ window.countNRooksSolutions = function(n) {
         // recursive call to check the following rows
       if (!board.hasAnyRooksConflicts()) {
         if (row === n - 1) {
-          solutionCount++;
+          // returns solutionCount for one column
+          count++;
         } else {
           checkRowBelow(row + 1);
         }
@@ -89,7 +91,26 @@ window.countNRooksSolutions = function(n) {
     }
   };
   
-  checkRowBelow(0);
+  // use symmetry to compute solutions for half of the board
+  for (let i = 0; i < Math.ceil(n / 2); i++) {
+    board.togglePiece(0, i);
+    delete openColumns[i];
+    var count = 0;
+    if (n === 1) {
+      count++;
+    }
+    checkRowBelow(1);
+    if (n % 2 === 0) {
+      solutionCount += 2 * count;
+    } else if (n % 2 !== 0 && i !== Math.floor(n / 2)) {
+      solutionCount += 2 * count;
+    } else {
+      solutionCount += count;
+    }
+    board.togglePiece(0, i);
+    openColumns[i] = i;
+  }  
+  
   
   console.log('Number of solutions for ' + n + ' rooks:', solutionCount);
   return solutionCount;
@@ -153,7 +174,7 @@ window.countNQueensSolutions = function(n) {
       delete openColumns[i];
       if (!board.hasAnyQueensConflicts()) {
         if (row === n - 1) {
-          solutionCount++;
+          count++;
         } else {
           checkRowBelow(row + 1, temp);
         }
@@ -162,10 +183,27 @@ window.countNQueensSolutions = function(n) {
       openColumns[i] = temp;
     }
   };
+  
+  for (let i = 0; i < Math.ceil(n / 2); i++) {
+    board.togglePiece(0, i);
+    var temp = openColumns[i];
+    delete openColumns[i];
+    var count = 0;
+    if (n === 1) {
+      count++;
+    }
+    checkRowBelow(1, temp);
+    if (n % 2 === 0) {
+      solutionCount += 2 * count;
+    } else if (n % 2 !== 0 && i !== Math.floor(n / 2)) {
+      solutionCount += 2 * count;
+    } else {
+      solutionCount += count;
+    }
+    board.togglePiece(0, i);
+    openColumns[i] = temp;
+  }
 
-  console.time('create obj');
-  checkRowBelow(0, openColumns);
-  console.timeEnd('create obj');
   if (n === 0) {
     solutionCount = 1;
   }
