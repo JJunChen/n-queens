@@ -167,6 +167,7 @@ window.countNQueensSolutions = function(n) {
       }
     }
   }
+  
   var checkRowBelow = function(row, index) {
     for (let i in index) {
       board.togglePiece(row, i);
